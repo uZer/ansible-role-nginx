@@ -1,6 +1,6 @@
 ---
-nginx_proxy_params:
-    proxy_intercept_errors: 'on'
+nginx_manage_limits: no
+nginx_manage_tcp: yes
 
 nginx_pools:
   - name: pool_local

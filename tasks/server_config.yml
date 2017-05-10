@@ -34,6 +34,12 @@
 - set_fact:
     nginx_def_worker_processes: "{{ cpu_num.stdout|int * 2}}"
     nginx_def_worker_rlimit_nofile: "{{ [filemax.stdout|int, ulimit.stdout|int] | min }}"
+  when: not nginx_manage_limits
+  tags:
+    - nginx
+    - server
+
+- set_fact:
     nginx_def_worker_connections: "{{ (nginx_def_worker_rlimit_nofile|int / 2)|int }}"
   when: not nginx_manage_limits
   tags:
