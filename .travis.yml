@@ -34,10 +34,6 @@ script:
   # Run the role/playbook with ansible-playbook.
   - "ansible-playbook -i tests/inventory tests/$SITE --connection=local --sudo"
 
-  # Run the role/playbook with ansible-playbook.
-  - "sudo tail -n20 /var/log/syslog"
-  - "sudo tail -n10 /var/log/nginx/*error*"
-  - "sudo service nginx restart"
   # Run the role/playbook again, checking to make sure it's idempotent.
   - >
     ansible-playbook -i tests/inventory tests/$SITE --connection=local --sudo

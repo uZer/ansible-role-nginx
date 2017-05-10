@@ -45,8 +45,8 @@ server {
 {% else %}
         # RAW Config location
 {% endif %}{% endif %}
-{% if loc.extra_content is defined %}
-{% for c in loc.extra_content %}
+{% if loc.conf is defined %}
+{% for c in loc.conf %}
         {{ c }}
 {% endfor %}
 {% endif %}

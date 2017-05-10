@@ -32,9 +32,8 @@ nginx_virtualhosts:
   locations:
   - name: '/testlocation'
     type: raw_config
-    extra_content:
-      - 'root /opt/testlocation;'
-      - 'try_files $uri $uri/ =404;'
+    conf:
+      - 'alias /opt/testlocation;'
   root: /opt/supervhost
 
 - domains:
