@@ -37,7 +37,7 @@ server {
         include         /etc/nginx/proxy_params;
 {% if loc.dont_forward_domain is defined %}
 {% else %}
-        include         /etc/nginx/proxyheader_params;
+        include         /etc/nginx/proxy_header_params;
 {% endif %}
 {% elif loc.type == "rewrite" %}
         rewrite {{ loc.source }} {{ loc.dest }} {{ loc.params|default('') }};

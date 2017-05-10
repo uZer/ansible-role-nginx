@@ -132,7 +132,8 @@
     - tls_params
     - gzip_params
     - proxy_params
-    - proxyheader_params
+    - proxy_header_params
+    - proxy_cache_params
     - nginx.conf
   notify:
     - restart nginx

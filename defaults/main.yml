@@ -42,10 +42,26 @@ nginx_gzip_params:
     - "application/xml+rss"
     - "text/javascript"
 
-
 # PROXY default configuration. You can safely override each of these values in
 # your playbook variables, default values are still defined in templates.
+#
+#   proxy_buffering: on for slow clients, off for fast clients
+#   proxy_buffers: value should be N * "getconf PAGESIZE"
+#   proxy_buffer_size: value should be equal or smaller than "getconf PAGESIZE"
+#
+#
+# Based on what I found here:
+# https://www.digitalocean.com/community/tutorials/understanding-nginx-http-proxying-load-balancing-buffering-and-caching
 nginx_proxy_params:
+  proxy_intercept_errors: 'on'
+  proxy_buffering: 'on'
+  proxy_buffer_size: '2k'
+  proxy_buffers: "64 4k"
+  proxy_busy_buffer_size: "8k"
+  proxy_busy_file_write_size: "8k"
+  proxy_max_temp_file_size: "2048m"
+  proxy_temp_file_write_size: "32k"
+  proxy_read_timeout: "300"
 
 ## PERFORMANCES AND SECURITY ###################################################
 
@@ -69,7 +85,7 @@ nginx_def_output_buffers: "1 32k"
 nginx_def_postpone_output: "1460"
 
 # Should not be root, will be overridden according to the distrubution vars
-nginx_user: nginx
+nginx_user: www-data
 
 # Default certificate trust store
 ssl_trusted_certificate: "/etc/ssl/certs/ca-certificates.crt"

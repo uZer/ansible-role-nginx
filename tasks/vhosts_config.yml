@@ -40,8 +40,8 @@
     mv -f "/etc/nginx/sites-enabled/{{ item }}" \
           "/etc/nginx/sites-available/.{{ item }}.bak.~"
   when: >
-    item not in managed_vhosts.results|map(attribute='stdout') and
-    item not in managed_pools.results|map(attribute='stdout') and
+    item not in managed_vhosts.results | map(attribute='stdout') and
+    item not in managed_pools.results  | map(attribute='stdout') and
     nginx_manage_directory
   with_items:
     - "{{ contents.stdout_lines }}"

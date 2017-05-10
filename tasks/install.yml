@@ -32,10 +32,22 @@
 - name: Create basic nginx file structure
   file:
     state: directory
-    path: "/etc/nginx/{{ item }}"
+    path: "{{ item }}"
   with_items:
-    - "sites-enabled"
-    - "sites-available"
+    - "/etc/nginx/sites-enabled"
+    - "/etc/nginx/sites-available"
+  tags:
+    - nginx
+    - install
+
+- name: Create nginx proxy cache directory
+  file:
+    state: directory
+    path: "{{ item }}"
+    user: "{{ nginx_user }}"
+    mode: "0700"
+  with_items:
+    - "/var/lib/nginx/cache"
   tags:
     - nginx
     - install

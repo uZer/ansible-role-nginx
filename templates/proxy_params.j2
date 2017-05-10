@@ -1,10 +1,11 @@
 # {{ ansible_managed }}
-proxy_intercept_errors      on;
-proxy_buffering             on;
-proxy_buffer_size           128k;
-proxy_buffers               256 16k;
-proxy_busy_buffers_size     256k;
-proxy_temp_file_write_size  256k;
-proxy_max_temp_file_size    0;
-proxy_read_timeout          300;
+proxy_intercept_errors      {{ nginx_proxy_params.proxy_intercept_errors|default('on') }};
+proxy_buffering             {{ nginx_proxy_params.proxy_buffering|default('on') }};
+proxy_buffer_size           {{ nginx_proxy_params.proxy_buffer_size|default('2k') }};
+proxy_buffers               {{ nginx_proxy_params.proxy_buffers|default('64 4k') }};
+proxy_busy_buffer_size      {{ nginx_proxy_params.proxy_busy_buffer_size|default('8k') }};
+proxy_temp_file_write_size  {{ nginx_proxy_params.proxy_temp_file_write_size|default('8k') }};
+proxy_max_temp_file_size    {{ nginx_proxy_params.proxy_max_temp_file_size|default('2048m') }};
+proxy_temp_file_write_size  {{ nginx_proxy_params.proxy_temp_file_write_size|default('32k') }};
+proxy_read_timeout          {{ nginx_proxy_params.proxy_read_timeout|default('300') }};
 
