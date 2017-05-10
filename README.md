@@ -2,17 +2,21 @@ ansible-role-nginx
 ==================
 [![Build Status](https://travis-ci.org/uZer/ansible-role-nginx.svg?branch=master)](https://travis-ci.org/uZer/ansible-role-nginx)
 
-This role installs nginx from apt/yum repository, configures nginx and
-virtualhosts. Compatible with letsencrypt
+This role installs nginx from apt/yum repository, configures nginx, system and
+virtualhosts. Compatible with letsencrypt.
 
 All variables should be configured in `host_vars` or `group_vars`.
+
+Check defaults/main.yml for a full list of variables you can use.
+
+All intrusive system tunning can be disables according to your needs.
 
 Dependencies
 ------------
 Should work on Centos, Redhat, Ubuntu, Debian.
 
-Exhaustive usage example
-------------------------
+Usage example
+-------------
 
 
 
