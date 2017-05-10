@@ -1,0 +1,74 @@
+# {{ ansible_managed }}
+{% if item.tls is defined %}{% if item.tls.redirect is defined %}
+### HTTP REDIRECT TO HTTPS #####################################################
+server {
+{% for l in item.tls.redirect %}
+    listen              {{ l }};
+{% endfor %}
+    server_name         {{ item.domains|join(' ') }};
+    rewrite             ^ https://$server_name$request_uri? permanent;
+}
+################################################################################
+{% endif %}{% endif %}
+
+### VIRTUALHOST
+server {
+{% for l in item.listen %}
+    listen              {{ l }};
+{% endfor %}
+    server_name         {{ item.domains|join(' ') }};
+    error_log           /var/log/nginx/error.{{ item.domains[0] }}.log warn;
+
+{% if item.root is defined %}
+    root                {{ item.root }};
+{% endif %}
+
+{% if item.locations is defined %}
+{% for loc in item.locations %}
+    location {{ loc.name }} {
+{% if loc.ldapgroup is defined %}
+        include         /etc/nginx/ldap_params;
+        require         group "cn={{ loc.ldapgroup }},cn=groups,cn=accounts,{{ ipa_ldap_domain }}";
+        auth_ldap       "ACCESS RESTRICTED";
+        auth_ldap_servers {% for i in ipa_servers %} {{ i }}{% endfor %};
+{% endif %}
+{% if loc.type is defined %}{% if loc.type == "rproxy" %}
+        proxy_pass      {{ loc.proto }}://{{ loc.backend_name }};
+        include         /etc/nginx/proxy_params;
+{% if loc.dont_forward_domain is defined %}
+{% else %}
+        include         /etc/nginx/proxyheader_params;
+{% endif %}
+{% elif loc.type == "rewrite" %}
+        rewrite {{ loc.source }} {{ loc.dest }} {{ loc.params|default('') }};
+{% elif loc.type == "raw_config" %}
+{% else %}
+        # RAW Config location
+{% endif %}{% endif %}
+{% if loc.extra_content is defined %}
+{% for c in loc.extra_content %}
+        {{ c }}
+{% endfor %}
+{% endif %}
+    }
+{% endfor %}
+{% endif %}
+
+    include             /etc/nginx/gzip_params;
+{% if item.tls is defined %}
+    ssl_certificate     {{ item.tls.cert }};
+    ssl_certificate_key {{ item.tls.key }};
+{% endif %}
+{% if item.letsencrypt is defined %}{% if item.letsencrypt %}
+    ## letsencrypt validation requirement
+    location ~ /\.well-known {
+        rewrite             ^/(.*)              /{{ item.domains[0] }}/$1 break;
+        proxy_set_header    Host                sslvalidation.mediaserv.net;
+        proxy_set_header    X-Real-IP           $remote_addr;
+    #   proxy_set_header    X-Forwarded-For     $proxy_add_x_forwarded_for;
+        proxy_set_header    X-Forwarded-Proto   $scheme;
+        proxy_pass          http://pool_publicftp;
+    }
+{% endif %}{% endif %}
+}
+

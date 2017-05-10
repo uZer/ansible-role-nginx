@@ -1,0 +1,9 @@
+# {{ ansible_managed }}
+upstream {{ item.name }} {
+{% if item.config is defined %}
+    {{ item.config }};
+{% endif %}
+{% for backend in item.backends %}
+    server {{ backend }};
+{% endfor %}
+}

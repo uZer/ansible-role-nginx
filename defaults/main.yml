@@ -1,0 +1,107 @@
+---
+# Whether ansible should or should not disable extra unwanted nginx vhosts
+nginx_manage_directory: yes
+
+# Whether ansible should or should not tune tcp port range, window, timeouts...
+nginx_manage_tcp: no
+
+# Whether ansible should or should not tune pam_limits to scale with nginx
+# See under for more details
+nginx_manage_limits: no
+
+
+## VHOSTS AND SERVICE ##########################################################
+# Define reverse proxy pools here
+nginx_pools: []
+
+# Define virtualhosts content
+nginx_virtualhosts: []
+
+## PARAMS ######################################################################
+
+# Default nginx service name
+nginx_service: nginx
+
+# LOG Level
+nginx_log_level: warn
+
+# GZIP default configuration. You can safely override each of these values in
+# your playbook variables, default values are still defined in templates.
+nginx_gzip_params:
+  comp_level: "6"
+  buffers: "16 8k"
+  min_length: "256"
+  http_version: "1.1"
+  types:
+    - "text/plain"
+    - "application/x-javascript"
+    - "text/xml"
+    - "text/css"
+    - "application/json"
+    - "application/xml"
+    - "application/xml+rss"
+    - "text/javascript"
+
+
+# PROXY default configuration. You can safely override each of these values in
+# your playbook variables, default values are still defined in templates.
+nginx_proxy_params:
+
+## PERFORMANCES AND SECURITY ###################################################
+
+# If you want to rewrite these values, recreate these variables without "def"
+# in name
+
+# Keepalive and names/types management
+nginx_def_keepalive_timeout: '20s'
+nginx_def_server_names_hash_bucket_size: '64'
+nginx_def_types_hash_max_size: '1024'
+
+# Client HTTP requests and responses
+nginx_def_client_max_body_size: "50M"
+nginx_def_client_body_buffer_size: "256k"
+nginx_def_client_header_buffer_size: "1k"
+nginx_def_large_client_header_buffers: "4 4k"
+nginx_def_client_header_timeout: "3m"
+nginx_def_client_body_timeout: "3m"
+nginx_def_send_timeout: "3m"
+nginx_def_output_buffers: "1 32k"
+nginx_def_postpone_output: "1460"
+
+# Should not be root, will be overridden according to the distrubution vars
+nginx_user: nginx
+
+# Default certificate trust store
+ssl_trusted_certificate: "/etc/ssl/certs/ca-certificates.crt"
+
+# The following "def" values will be overwritten by ansible based on system
+# values if "nginx_manage_limits: no"
+# If you want to rewrite these values, create the following variables:
+#   nginx_worker_processes
+#   nginx_worker_connections
+#   nginx_worker_rlimit_nofile
+# If you want to configure system's limits to match your values, please add
+#   nginx_manage_limits: yes
+# Please keep in mind that 65535 is a maximum value
+
+# Will be overridden by 2 * "grep processor /proc/cpuinfo | wc -l"
+# if nginx_manage_limits: no
+nginx_def_worker_processes: auto
+
+# Will be overridden by min("ulimit -n", "cat /proc/sys/fs/file-max")
+# if nginx_manage_directory: no
+nginx_def_worker_rlimit_nofile: '8192'
+nginx_def_worker_connections: "{{ nginx_def_worker_rlimit_nofile / 2 | int }}"
+
+
+## LOGGING #####################################################################
+
+
+
+## OTHER #######################################################################
+nginx_ldap_groups: []
+ipa_ldap_hasauth: false
+ipa_ldap_domain: "dc=void"
+ipa_servers: []
+
+# vim:ft=ansible:

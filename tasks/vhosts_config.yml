@@ -1,0 +1,60 @@
+---
+## Check what exists, guess what to delete #####################################
+- name: List current vhosts
+  shell: ls -1 /etc/nginx/sites-enabled
+  register: contents
+  check_mode: no
+  changed_when: False
+  when: nginx_manage_directory
+
+- name: Build list of ansible managed vhosts
+  shell: "echo vhost_{{ item.domains.0 }}.conf"
+  register: managed_vhosts
+  check_mode: no
+  changed_when: False
+  when: nginx_manage_directory
+  with_items:
+    - "{{ nginx_virtualhosts }}"
+
+- name: Build list of ansible managed pools
+  shell: "echo {{ item.name }}"
+  register: managed_pools
+  check_mode: no
+  changed_when: False
+  when: nginx_manage_directory
+  with_items:
+    - "{{ nginx_pools }}"
+
+## Move unwanted configuration #################################################
+- name: NGINX remove unmanaged files
+  shell: >
+    mv -f /etc/nginx/sites-enabled/{{ item }} \
+          /etc/nginx/sites-available/.{{ item }}.bak.~"
+  when: >
+    item not in managed_vhosts.results|map(attribute='stdout') and
+    item not in managed_pools.results|map(attribute='stdout') and
+    nginx_manage_directory
+  with_items:
+    - "{{ contents.stdout_lines }}"
+  notify:
+    - reload nginx
+
+## Deploy configuration ########################################################
+- name: Deploy backend server pools
+  template:
+    src: "server_pool.j2"
+    dest: "/etc/nginx/sites-enabled/{{ item.name }}"
+  with_items:
+    - "{{ nginx_pools }}"
+  notify:
+    - reload nginx
+
+- name: Deploy virtualhost configurations
+  template:
+    src: "virtualhost.conf.j2"
+    dest: "/etc/nginx/sites-enabled/vhost_{{ item.domains.0 }}.conf"
+  with_items:
+    - "{{ nginx_virtualhosts }}"
+  notify:
+    - restart nginx
+# vim:ft=ansible:

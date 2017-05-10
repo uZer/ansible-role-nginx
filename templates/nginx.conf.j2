@@ -1,0 +1,53 @@
+# {{ ansible_managed }}
+user                    {{ nginx_user }};
+pid                     /run/nginx.pid;
+worker_processes        {{ nginx_worker_processes | default(nginx_def_worker_processes) }};
+
+events {
+    worker_connections  {{ nginx_worker_connections | default(nginx_def_worker_processes) }};
+    multi_accept        on;
+}
+
+http {
+
+    # Logging
+    map $status $loggable {
+            ~^[23]  0;
+                default 1;
+    }
+    error_log               /var/log/nginx/error.log {{ nginx_log_level }};
+    log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '
+                      '$status $body_bytes_sent "$http_referer" '
+                      '"$http_user_agent" "$gzip_ratio" "$http_x_forwarded_for"';
+
+    # Performances, security and tunning
+    sendfile            on;
+    tcp_nopush          on;
+    tcp_nodelay         on;
+    keepalive_timeout   {{ nginx_keepalive_timeout | default(nginx_def_keepalive_timeout) }};
+    types_hash_max_size {{ nginx_types_hash_max_size | default(nginx_def_types_hash_max_size) }};
+    server_names_hash_bucket_size {{ nginx_server_names_hash_bucket_size | default(nginx_def_server_names_hash_bucket_size) }};
+    client_max_body_size          {{ nginx_client_max_body_size | defaults(nginx_def_client_max_body_size) }};
+    client_body_buffer_size       {{ nginx_client_body_buffer_size | defaults(nginx_def_client_body_buffer_size) }};
+    client_header_buffer_size     {{ nginx_client_header_buffer_size | defaults(nginx_def_client_header_buffer_size) }};
+    large_client_header_buffers   {{ nginx_large_client_header_buffers | defaults(nginx_def_large_client_header_buffers) }};
+    client_header_timeout         {{ nginx_client_header_timeout | defaults(nginx_def_client_header_timeout) }};
+    client_body_timeout           {{ nginx_client_body_timeout | defaults(nginx_def_client_body_timeout) }};
+    send_timeout                  {{ nginx_client_send_timeout | defaults(nginx_def_send_timeout) }};
+    output_buffers                {{ nginx_output_buffers | defaults(nginx_def_output_buffers) }};
+    postpone_output               {{ nginx_postpone_output | defaults(nginx_def_postpone_output) }};
+
+    reset_timedout_connection     on;
+
+    include             mime.types;
+    default_type        application/octet-stream;
+
+    # Various includes, can be overriden in vhosts
+    gzip                on;
+    include             gzip_params;
+    include             tls_params;
+    include             cache_params;
+
+    include             conf.d/*.conf;
+    include             sites-enabled/*;
+}

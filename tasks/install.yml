@@ -1,0 +1,30 @@
+---
+- name: Install nginx (yum)
+  yum:
+    name: "{{ item }}"
+    state: installed
+  when: ansible_os_family == 'RedHat'
+  with_items:
+    - nginx
+    - ca-certificates
+
+- name: Install nginx (apt)
+  apt:
+    name: nginx
+    state: installed
+  when: ansible_os_family == 'Debian'
+
+- name: apt-get install nginx-extras for LDAP authentication and more
+  apt:
+    name: nginx-extras
+    state: installed
+  when: ansible_os_family == 'Debian' and nginx_has_ldapauth == 'yes'
+
+- name: Create basic nginx file structure
+  file:
+    state: directory
+    path: "/etc/nginx/{{ item }}"
+  with_items:
+    - "sites-enabled"
+    - "sites-available"
+# vim:ft=ansible:
