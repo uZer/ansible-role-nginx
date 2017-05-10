@@ -3,7 +3,7 @@ dependencies: []
 
 galaxy_info:
   author: uZer
-  description: Keepalived Configuration
+  description: nginx configuration and system tweaks
   company: "TheVOID"
   license: "Beerware"
   min_ansible_version: 2.2
@@ -20,5 +20,10 @@ galaxy_info:
     - all
   galaxy_tags:
     - networking
-    - loadbalancing
-    - vip
+    - reverse-proxy
+    - nginx
+    - virtualhost
+    - limits
+    - performances
+    - tweaking
+
