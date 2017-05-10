@@ -15,10 +15,10 @@ Dependencies
 ------------
 Should work on Centos, Redhat, Ubuntu, Debian.
 
-Usage example
--------------
+Usage
+-----
 
-
+    Work in progress, check tests/group_vars/all for an example
 
 License
 -------

@@ -11,6 +11,11 @@ env:
 notifications:
   webhooks: https://galaxy.ansible.com/api/v1/notifications/
 
+addons:
+  hosts:
+    - supervhost.local
+    - supervhost.proxy
+
 install:
   - "pip install ansible"
   # Add ansible.cfg to pick up roles path.
@@ -18,10 +23,9 @@ install:
   - "mkdir -p /opt/defaultvhost"
   - "mkdir -p /opt/supervhost"
   - "mkdir -p /opt/testlocation"
-  - "{ echo '<html><body>default</body></html> } > /opt/defaultvhost/index.html"
-  - "{ echo '<html><body>supervhost</body></html> } > /opt/supervhost/index.html"
-  - "{ echo '<html><body>supervhost testlocation</body></html> } > /opt/testlocation/index.html"
-  - "{ echo '127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4 supervhost.local supervhost.proxy' } >> /etc/hosts"
+  - "echo '<html><body>default</body></html>'> /opt/defaultvhost/index.html"
+  - "echo '<html><body>supervhost</body></html>' > /opt/supervhost/index.html"
+  - "echo '<html><body>supervhost testlocation</body></html>' > /opt/testlocation/index.html"
 
 script:
   # Check the role/playbook's syntax.
@@ -38,7 +42,8 @@ script:
     || (echo 'Idempotence test: fail' && exit 1)
 
   # Check service : default vhost
-  - curl -L http://localhost/ | grep -q 'defaultvhost'
+  - >
+    curl -L http://localhost/ | grep -q 'defaultvhost'
     && (echo 'local vhost serve index test: pass' && exit 0)
     || (echo 'local vhost serve index test: fail' && exit 1)
 
