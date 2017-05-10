@@ -20,14 +20,14 @@
     - nginx
     - install
 
-- name: apt-get install nginx-extras for LDAP authentication and more
-  apt:
-    name: nginx-extras
-    state: installed
-  when: ansible_os_family == 'Debian' and nginx_has_ldapauth == 'yes'
-  tags:
-    - nginx
-    - install
+# - name: apt-get install nginx-extras for LDAP authentication and more
+  # apt:
+    # name: nginx-extras
+    # state: installed
+  # when: ansible_os_family == 'Debian' and nginx_has_ldapauth == 'yes'
+  # tags:
+    # - nginx
+    # - install
 
 - name: Create basic nginx file structure
   file:

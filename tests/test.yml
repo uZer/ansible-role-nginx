@@ -1,6 +1,6 @@
 ---
 - name: Deploy Nginx and configure
-  hosts: all
+  hosts: localhost
   remote_user: root
   roles:
     - ansible-role-nginx
