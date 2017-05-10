@@ -93,11 +93,6 @@ nginx_def_worker_processes: auto
 nginx_def_worker_rlimit_nofile: '8192'
 nginx_def_worker_connections: "{{ nginx_def_worker_rlimit_nofile / 2 | int }}"
 
-
-## LOGGING #####################################################################
-
-
-
 ## OTHER #######################################################################
 nginx_ldap_groups: []
 ipa_ldap_hasauth: false

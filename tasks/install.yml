@@ -7,18 +7,27 @@
   with_items:
     - nginx
     - ca-certificates
+  tags:
+    - nginx
+    - install
 
 - name: Install nginx (apt)
   apt:
     name: nginx
     state: installed
   when: ansible_os_family == 'Debian'
+  tags:
+    - nginx
+    - install
 
 - name: apt-get install nginx-extras for LDAP authentication and more
   apt:
     name: nginx-extras
     state: installed
   when: ansible_os_family == 'Debian' and nginx_has_ldapauth == 'yes'
+  tags:
+    - nginx
+    - install
 
 - name: Create basic nginx file structure
   file:
@@ -27,4 +36,7 @@
   with_items:
     - "sites-enabled"
     - "sites-available"
+  tags:
+    - nginx
+    - install
 # vim:ft=ansible:

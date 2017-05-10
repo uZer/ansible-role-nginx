@@ -7,6 +7,9 @@
   check_mode: false
   changed_when: false
   when: not nginx_manage_limits
+  tags:
+    - nginx
+    - system
 
 - name: Compute worker configuration according to number of ulimit
   shell: cat /proc/sys/fs/file-max
@@ -14,6 +17,9 @@
   check_mode: false
   changed_when: false
   when: not nginx_manage_limits
+  tags:
+    - nginx
+    - system
 
 - name: Compute worker configuration according to number of ulimit
   shell: ulimit -n
@@ -21,12 +27,18 @@
   check_mode: false
   changed_when: false
   when: not nginx_manage_limits
+  tags:
+    - nginx
+    - system
 
 - set_fact:
     nginx_def_worker_processes: "{{ cpu_num.stdout * 2 }}"
     nginx_def_worker_rlimit_nofile: "{{ [filemax.stdout, ulimit.stdout] | min }}"
-    nginx_def_worker_connections: "{{ nginx_def_worker_rlimit_nofile / 2 | int }}"
+    nginx_def_worker_connections: "{{ nginx_def_worker_rlimit_nofile|int / 2 }}"
   when: not nginx_manage_limits
+  tags:
+    - nginx
+    - system
 
 ## IF nginx_manage_limits ######################################################
 
@@ -38,6 +50,9 @@
       "{{ nginx_worker_rlimit_nofile |
           default(nginx_def_worker_rlimit_nofile) }}"
   when: nginx_manage_limits
+  tags:
+    - nginx
+    - system
 
 - name: Reconfigure system limits if managed
   pam_limits:
@@ -51,6 +66,9 @@
   with_items:
       - hard
       - soft
+  tags:
+    - nginx
+    - system
 
 ## IF nginx_manage_tcp #########################################################
 
@@ -60,6 +78,9 @@
     state: present
     value: 15
   when: nginx_manage_tcp
+  tags:
+    - nginx
+    - system
 
 - name: Widen sysctl local port range for ipv4
   sysctl:
@@ -67,13 +88,19 @@
     state: present
     value: "10100 65000"
   when: nginx_manage_tcp
+  tags:
+    - nginx
+    - system
 
 - name: Ensure max tcp window scale > 65535 (RFC 1323).
   sysctl:
     name: 'net.ipv4.tcp_window_scaling'
     state: present
     value: "1"
-    when: nginx_manage_tcp
+  when: nginx_manage_tcp
+  tags:
+    - nginx
+    - system
 
 - name: Augment max connections waiting nginx acceptance
   sysctl:
@@ -81,13 +108,19 @@
     state: present
     value: "1024"
   when: nginx_manage_tcp
+  tags:
+    - nginx
+    - system
 
 - name: Augment connection queue size, for connections waiting nginx acceptance
   sysctl:
     name: 'net.ipv4.tcp_max_tw_buckets'
     state: present
     value: "32768"
-    when: nginx_manage_tcp
+  when: nginx_manage_tcp
+  tags:
+    - nginx
+    - system
 
 ## Deploy config ###############################################################
 - name: Deploy server side configuration (included in vhosts or nginx.conf)
@@ -95,11 +128,15 @@
     src: "{{ item }}.j2"
     dest: "/etc/nginx/{{ item }}"
   with_items:
-    - proxy_params
-    - proxyheader_params
+    - cache_params
     - tls_params
     - gzip_params
-    #- ldap_params
+    - proxy_params
+    - proxyheader_params
+    - nginx.conf
   notify:
     - restart nginx
+  tags:
+    - nginx
+    - configure
 # vim:ft=ansible:

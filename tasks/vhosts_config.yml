@@ -6,6 +6,9 @@
   check_mode: no
   changed_when: False
   when: nginx_manage_directory
+  tags:
+    - nginx
+    - configure
 
 - name: Build list of ansible managed vhosts
   shell: "echo vhost_{{ item.domains.0 }}.conf"
@@ -15,6 +18,9 @@
   when: nginx_manage_directory
   with_items:
     - "{{ nginx_virtualhosts }}"
+  tags:
+    - nginx
+    - configure
 
 - name: Build list of ansible managed pools
   shell: "echo {{ item.name }}"
@@ -24,12 +30,15 @@
   when: nginx_manage_directory
   with_items:
     - "{{ nginx_pools }}"
+  tags:
+    - nginx
+    - configure
 
 ## Move unwanted configuration #################################################
 - name: NGINX remove unmanaged files
   shell: >
-    mv -f /etc/nginx/sites-enabled/{{ item }} \
-          /etc/nginx/sites-available/.{{ item }}.bak.~"
+    mv -f "/etc/nginx/sites-enabled/{{ item }}" \
+          "/etc/nginx/sites-available/.{{ item }}.bak.~"
   when: >
     item not in managed_vhosts.results|map(attribute='stdout') and
     item not in managed_pools.results|map(attribute='stdout') and
@@ -38,6 +47,9 @@
     - "{{ contents.stdout_lines }}"
   notify:
     - reload nginx
+  tags:
+    - nginx
+    - configure
 
 ## Deploy configuration ########################################################
 - name: Deploy backend server pools
@@ -48,6 +60,9 @@
     - "{{ nginx_pools }}"
   notify:
     - reload nginx
+  tags:
+    - nginx
+    - configure
 
 - name: Deploy virtualhost configurations
   template:
@@ -57,4 +72,7 @@
     - "{{ nginx_virtualhosts }}"
   notify:
     - restart nginx
+  tags:
+    - nginx
+    - configure
 # vim:ft=ansible:

@@ -1,6 +1,6 @@
 ---
-- name: Deploy Keepalived
-  hosts: localhost
+- name: Deploy Nginx and configure
+  hosts: all
   remote_user: root
   roles:
     - ansible-role-nginx
