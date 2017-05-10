@@ -44,7 +44,7 @@
   file:
     state: directory
     path: "{{ item }}"
-    user: "{{ nginx_user }}"
+    owner: "{{ nginx_user }}"
     mode: "0700"
   with_items:
     - "/var/lib/nginx/cache"
