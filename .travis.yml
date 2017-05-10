@@ -15,6 +15,13 @@ install:
   - "pip install ansible"
   # Add ansible.cfg to pick up roles path.
   - "{ echo '[defaults]'; echo 'roles_path = ../'; } >> ansible.cfg"
+  - "mkdir -p /opt/defaultvhost"
+  - "mkdir -p /opt/supervhost"
+  - "mkdir -p /opt/testlocation"
+  - "{ echo '<html><body>default</body></html> } > /opt/defaultvhost/index.html"
+  - "{ echo '<html><body>supervhost</body></html> } > /opt/supervhost/index.html"
+  - "{ echo '<html><body>supervhost testlocation</body></html> } > /opt/testlocation/index.html"
+  - "{ echo '127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4 supervhost.local supervhost.proxy' } >> /etc/hosts"
 
 script:
   # Check the role/playbook's syntax.
@@ -29,3 +36,26 @@ script:
     | grep -q 'changed=0.*failed=0'
     && (echo 'Idempotence test: pass' && exit 0)
     || (echo 'Idempotence test: fail' && exit 1)
+
+  # Check service : default vhost
+  - curl -L http://localhost/ | grep -q 'defaultvhost'
+    && (echo 'local vhost serve index test: pass' && exit 0)
+    || (echo 'local vhost serve index test: fail' && exit 1)
+
+  # Check service : local vhost
+  - >
+    curl -L http://supervhost.local:8080/ | grep -q 'supervhost'
+    && (echo 'local vhost serve index test: pass' && exit 0)
+    || (echo 'local vhost serve index test: fail' && exit 1)
+
+  # Check service : rproxied vhost
+  - >
+    curl -L http://supervhost.proxy/ | grep -q 'supervhost'
+    && (echo 'proxied vhost serve index test: pass' && exit 0)
+    || (echo 'proxied vhost serve index test: fail' && exit 1)
+
+  # Check service : rproxied vhost backend location
+  - >
+    curl -L http://supervhost.proxy/testlocation/ | grep -q 'testlocation'
+    && (echo 'proxied vhost backend location test: pass' && exit 0)
+    || (echo 'proxied vhost backend location test: fail' && exit 1)

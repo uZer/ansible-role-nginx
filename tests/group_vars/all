@@ -1,4 +1,52 @@
 ---
 nginx_proxy_params:
-    proxy_intercept_errors: 'off'
+    proxy_intercept_errors: 'on'
+
+nginx_pools:
+  - name: pool_local
+    config: ip_hash
+    backends:
+      - "supervhost.local:8080"
+      - "supervhost.local:8081 weight=2"
+
+nginx_virtualhosts:
+- domains:
+  - '_'
+  listen:
+  - "[::]:80    default_server"
+  - "[::]:8080  default_server"
+  - "[::]:8081  default_server"
+  - "80         default_server"
+  - "8080       default_server"
+  - "8081       default_server"
+  root: /opt/defaultvhost
+
+- domains:
+  - "supervhost.local"
+  listen:
+  - "[::]:8080"
+  - "[::]:8081"
+  - "8080"
+  - "8081"
+  location:
+  - name: '/opt/testlocation'
+    type: raw_config
+    extra_content:
+      - 'try_files $uri $uri/ =404;'
+  root: /opt/supervhost
+
+- domains:
+  - "supervhost.proxy"
+  listen:
+  - "[::]:80"
+  - "80"
+  location:
+  - name: '/'
+    type: rproxy
+    backend_name: "pool_local"
+    proto: http
+  root: /opt/supervhost
+
+
+
 
