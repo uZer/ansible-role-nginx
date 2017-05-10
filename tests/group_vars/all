@@ -23,15 +23,17 @@ nginx_virtualhosts:
 
 - domains:
   - "supervhost.local"
+  - "supervhost.rproxy"
   listen:
   - "[::]:8080"
   - "[::]:8081"
   - "8080"
   - "8081"
-  location:
-  - name: '/opt/testlocation'
+  locations:
+  - name: '/testlocation'
     type: raw_config
     extra_content:
+      - 'root /opt/testlocation;'
       - 'try_files $uri $uri/ =404;'
   root: /opt/supervhost
 
@@ -40,12 +42,13 @@ nginx_virtualhosts:
   listen:
   - "[::]:80"
   - "80"
-  location:
+  locations:
   - name: '/'
     type: rproxy
-    backend_name: "pool_local"
+    backend_name: "supervhost.local:8081"
     proto: http
-  root: /opt/supervhost
+    dont_forward_domain: yes
+  root: /opt/defaultvhost
 
 
 

@@ -9,7 +9,7 @@
   when: not nginx_manage_limits
   tags:
     - nginx
-    - system
+    - server
 
 - name: Compute worker configuration according to number of ulimit
   shell: cat /proc/sys/fs/file-max
@@ -19,7 +19,7 @@
   when: not nginx_manage_limits
   tags:
     - nginx
-    - system
+    - server
 
 - name: Compute worker configuration according to number of ulimit
   shell: ulimit -n
@@ -29,16 +29,31 @@
   when: not nginx_manage_limits
   tags:
     - nginx
-    - system
+    - server
 
 - set_fact:
-    nginx_def_worker_processes: "{{ cpu_num.stdout * 2 }}"
-    nginx_def_worker_rlimit_nofile: "{{ [filemax.stdout, ulimit.stdout] | min }}"
-    nginx_def_worker_connections: "{{ nginx_def_worker_rlimit_nofile|int / 2 }}"
+    nginx_def_worker_processes: "{{ cpu_num.stdout|int * 2}}"
+    nginx_def_worker_rlimit_nofile: "{{ [filemax.stdout|int, ulimit.stdout|int] | min }}"
+    nginx_def_worker_connections: "{{ (nginx_def_worker_rlimit_nofile|int / 2)|int }}"
   when: not nginx_manage_limits
   tags:
     - nginx
-    - system
+    - server
+
+- debug:
+    var: "{{ item }}"
+  changed_when: false
+  with_items:
+    - "cpu_num.stdout"
+    - "filemax.stdout"
+    - "ulimit.stdout"
+    - "nginx_def_worker_processes"
+    - "nginx_def_worker_rlimit_nofile"
+    - "nginx_def_worker_connections"
+  when: not nginx_manage_limits
+  tags:
+    - nginx
+    - server
 
 ## IF nginx_manage_limits ######################################################
 
@@ -52,7 +67,7 @@
   when: nginx_manage_limits
   tags:
     - nginx
-    - system
+    - server
 
 - name: Reconfigure system limits if managed
   pam_limits:
@@ -68,7 +83,7 @@
       - soft
   tags:
     - nginx
-    - system
+    - server
 
 ## IF nginx_manage_tcp #########################################################
 
@@ -80,7 +95,7 @@
   when: nginx_manage_tcp
   tags:
     - nginx
-    - system
+    - server
 
 - name: Widen sysctl local port range for ipv4
   sysctl:
@@ -90,7 +105,7 @@
   when: nginx_manage_tcp
   tags:
     - nginx
-    - system
+    - server
 
 - name: Ensure max tcp window scale > 65535 (RFC 1323).
   sysctl:
@@ -100,7 +115,7 @@
   when: nginx_manage_tcp
   tags:
     - nginx
-    - system
+    - server
 
 - name: Augment max connections waiting nginx acceptance
   sysctl:
@@ -110,7 +125,7 @@
   when: nginx_manage_tcp
   tags:
     - nginx
-    - system
+    - server
 
 - name: Augment connection queue size, for connections waiting nginx acceptance
   sysctl:
@@ -120,7 +135,7 @@
   when: nginx_manage_tcp
   tags:
     - nginx
-    - system
+    - server
 
 ## Deploy config ###############################################################
 - name: Deploy server side configuration (included in vhosts or nginx.conf)
@@ -139,5 +154,5 @@
     - restart nginx
   tags:
     - nginx
-    - configure
+    - server
 # vim:ft=ansible:

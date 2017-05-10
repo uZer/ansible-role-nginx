@@ -1,3 +1,4 @@
 ---
 ssl_trusted_certificate: "/etc/pki/ca-trust/extracted/openssl/ca-bundle.trust.crt"
+nginx_user: nginx
 # vim:ft=ansible:

@@ -34,6 +34,10 @@ script:
   # Run the role/playbook with ansible-playbook.
   - "ansible-playbook -i tests/inventory tests/$SITE --connection=local --sudo"
 
+  # Run the role/playbook with ansible-playbook.
+  - "sudo tail -n20 /var/log/syslog"
+  - "sudo tail -n10 /var/log/nginx/*error*"
+  - "sudo service nginx restart"
   # Run the role/playbook again, checking to make sure it's idempotent.
   - >
     ansible-playbook -i tests/inventory tests/$SITE --connection=local --sudo
@@ -43,24 +47,24 @@ script:
 
   # Check service : default vhost
   - >
-    curl -L http://localhost/ | grep -q 'defaultvhost'
+    curl -L http://localhost/ 2>/dev/null | grep -q 'default'
     && (echo 'local vhost serve index test: pass' && exit 0)
     || (echo 'local vhost serve index test: fail' && exit 1)
 
   # Check service : local vhost
   - >
-    curl -L http://supervhost.local:8080/ | grep -q 'supervhost'
+    curl -L http://supervhost.local:8080/ 2>/dev/null | grep -q 'supervhost'
     && (echo 'local vhost serve index test: pass' && exit 0)
     || (echo 'local vhost serve index test: fail' && exit 1)
 
   # Check service : rproxied vhost
   - >
-    curl -L http://supervhost.proxy/ | grep -q 'supervhost'
+    curl -L http://supervhost.proxy/ 2>/dev/null | grep -q 'supervhost'
     && (echo 'proxied vhost serve index test: pass' && exit 0)
     || (echo 'proxied vhost serve index test: fail' && exit 1)
 
   # Check service : rproxied vhost backend location
   - >
-    curl -L http://supervhost.proxy/testlocation/ | grep -q 'testlocation'
+    curl -L http://supervhost.proxy/testlocation/ 2>/dev/null | grep -q 'testlocation'
     && (echo 'proxied vhost backend location test: pass' && exit 0)
     || (echo 'proxied vhost backend location test: fail' && exit 1)

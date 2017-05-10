@@ -2,9 +2,10 @@
 user                    {{ nginx_user }};
 pid                     /run/nginx.pid;
 worker_processes        {{ nginx_worker_processes | default(nginx_def_worker_processes) }};
+server_tokens           off;
 
 events {
-    worker_connections  {{ nginx_worker_connections | default(nginx_def_worker_processes) }};
+    worker_connections  {{ nginx_worker_connections | default(nginx_def_worker_connections) }};
     multi_accept        on;
 }
 
@@ -43,11 +44,9 @@ http {
     default_type                    application/octet-stream;
 
     # Various includes, can be overriden in vhosts
-    gzip                            on;
-    include                         gzip_params;
     include                         tls_params;
     include                         cache_params;
 
-    include                         conf.d/*.conf;
+    include                         conf.d/*;
     include                         sites-enabled/*;
 }
