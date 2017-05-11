@@ -107,7 +107,7 @@ nginx_def_worker_processes: auto
 # Will be overridden by min("ulimit -n", "cat /proc/sys/fs/file-max")
 # if nginx_manage_directory: no
 nginx_def_worker_rlimit_nofile: '8192'
-nginx_def_worker_connections: "{{ nginx_def_worker_rlimit_nofile / 2 | int }}"
+nginx_def_worker_connections: "{{ nginx_def_worker_rlimit_nofile|int / 2 | int }}"
 
 ## OTHER #######################################################################
 nginx_ldap_groups: []
