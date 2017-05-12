@@ -18,9 +18,7 @@
     domain: nginx
     limit_type: "{{ item }}"
     limit_item: nofile
-    value: |
-      "{{ nginx_worker_rlimit_nofile |
-          default(nginx_def_worker_rlimit_nofile) }}"
+    value: "{{ nginx_worker_rlimit_nofile|int | default(nginx_def_worker_rlimit_nofile|int) }}"
   when: nginx_manage_limits
   with_items:
       - hard
