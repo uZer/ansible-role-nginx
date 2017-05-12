@@ -44,6 +44,7 @@ http {
     default_type                    application/octet-stream;
 
     # Various includes, can be overriden in vhosts
+    include                         gzip_params;
     include                         tls_params;
     include                         cache_params;
 

@@ -54,7 +54,6 @@ server {
 {% endfor %}
 {% endif %}
 
-    include             /etc/nginx/gzip_params;
 {% if item.tls is defined %}
     ssl_certificate     {{ item.tls.cert }};
     ssl_certificate_key {{ item.tls.key }};
