@@ -1,66 +1,4 @@
 ---
-## IF NOT nginx_manage_limits ##################################################
-
-- name: Compute worker configuration according to number of CPU
-  shell: grep processor /proc/cpuinfo | wc -l
-  register: cpu_num
-  check_mode: false
-  changed_when: false
-  when: not nginx_manage_limits
-  tags:
-    - nginx
-    - server
-
-- name: Compute worker configuration according to number of ulimit
-  shell: cat /proc/sys/fs/file-max
-  register: filemax
-  check_mode: false
-  changed_when: false
-  when: not nginx_manage_limits
-  tags:
-    - nginx
-    - server
-
-- name: Compute worker configuration according to number of ulimit
-  shell: ulimit -n
-  register: ulimit
-  check_mode: false
-  changed_when: false
-  when: not nginx_manage_limits
-  tags:
-    - nginx
-    - server
-
-- set_fact:
-    nginx_def_worker_processes: "{{ cpu_num.stdout|int * 2}}"
-    nginx_def_worker_rlimit_nofile: "{{ [filemax.stdout|int, ulimit.stdout|int] | min }}"
-  when: not nginx_manage_limits
-  tags:
-    - nginx
-    - server
-
-- set_fact:
-    nginx_def_worker_connections: "{{ (nginx_def_worker_rlimit_nofile|int / 2)|int }}"
-  when: not nginx_manage_limits
-  tags:
-    - nginx
-    - server
-
-- debug:
-    var: "{{ item }}"
-  changed_when: false
-  with_items:
-    - "cpu_num.stdout"
-    - "filemax.stdout"
-    - "ulimit.stdout"
-    - "nginx_def_worker_processes"
-    - "nginx_def_worker_rlimit_nofile"
-    - "nginx_def_worker_connections"
-  when: not nginx_manage_limits
-  tags:
-    - nginx
-    - server
-
 ## IF nginx_manage_limits ######################################################
 
 - name: Reconfigure sysctl max fd open
@@ -139,6 +77,62 @@
     state: present
     value: "32768"
   when: nginx_manage_tcp
+  tags:
+    - nginx
+    - server
+
+## Compute default values ######################################################
+## They will be only used if params (without "def") are not defined by user.
+- name: Compute worker configuration according to number of CPU
+  shell: grep processor /proc/cpuinfo | wc -l
+  register: cpu_num
+  check_mode: false
+  changed_when: false
+  tags:
+    - nginx
+    - server
+
+- name: Compute worker configuration according to number of ulimit
+  shell: cat /proc/sys/fs/file-max
+  register: filemax
+  check_mode: false
+  changed_when: false
+  tags:
+    - nginx
+    - server
+
+- name: Compute worker configuration according to number of ulimit
+  shell: ulimit -n
+  register: ulimit
+  check_mode: false
+  changed_when: false
+  tags:
+    - nginx
+    - server
+
+- set_fact:
+    nginx_def_worker_processes: "{{ cpu_num.stdout|int * 2}}"
+    nginx_def_worker_rlimit_nofile: "{{ [filemax.stdout|int, ulimit.stdout|int] | min }}"
+  tags:
+    - nginx
+    - server
+
+- set_fact:
+    nginx_def_worker_connections: "{{ (nginx_def_worker_rlimit_nofile|int / 2)|int }}"
+  tags:
+    - nginx
+    - server
+
+- debug:
+    var: "{{ item }}"
+  changed_when: false
+  with_items:
+    - "cpu_num.stdout"
+    - "filemax.stdout"
+    - "ulimit.stdout"
+    - "nginx_def_worker_processes"
+    - "nginx_def_worker_rlimit_nofile"
+    - "nginx_def_worker_connections"
   tags:
     - nginx
     - server
