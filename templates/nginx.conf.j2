@@ -10,15 +10,16 @@ events {
 
 http {
 
-    # Logging
+    # Logging all but 2xx/3xx
     map $status $loggable {
-            ~^[23]  0;
-                default 1;
+        ~^[23]  0;
+        default 1;
     }
     error_log               /var/log/nginx/error.log {{ nginx_log_level }};
-{% for i in nginx_log_format.iteritems() %}
-    log_format {{ i.key }} {{ i.value }}
+{% for i,j in nginx_log_format.iteritems() %}
+    log_format {{ i }} '{{ j }}'
 {% endfor %}
+
     # Performances, security and tunning
     sendfile                        on;
     tcp_nopush                      on;
