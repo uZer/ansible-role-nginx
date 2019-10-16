@@ -57,6 +57,12 @@ server {
 {% if item.tls is defined %}
     ssl_certificate     {{ item.tls.cert }};
     ssl_certificate_key {{ item.tls.key }};
+{% if item.client is defined %}
+    ssl_client_certificate {{ item.tls.client }};
+{% endif %}
+{% if item.client_verify is defined %}
+    ssl_verify_client {{ item.tls.client_verify }}; 
+{% endif %}
 {% endif %}
 {% if item.letsencrypt is defined %}{% if item.letsencrypt %}
     ## letsencrypt validation requirement
